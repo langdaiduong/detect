@@ -96,7 +96,9 @@ def image_best(number_frame, minfame, classes = read_class_names(cfg.YOLO.CLASSE
         if cv2.waitKey(1) & 0xFF == ord('q'): break
         count_frame +=1
         print("frame:" + str(count_frame))
-        print("person:" + str(count_frame_class[0]), "hand:" + str(count_frame_class[1]))
+        classes = read_class_names(cfg.YOLO.CLASSES)
+        for i in range(num_classes):
+            print(classes[i] + ":" + str(count_frame_class[i]))
     cv2.destroyAllWindows()
     ###############################################################################
     for z in range(num_classes):
