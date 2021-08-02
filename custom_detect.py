@@ -12,9 +12,9 @@ import numpy as np
 from core.config import cfg
 
 input_size = 416
-video_path = "./data/video/test.mp4"
+video_path = "./data/video/dirty.mp4"
 
-saved_model_loaded = tf.saved_model.load('./checkpoints/yolov4-tiny-classroomv1-416', tags=[tag_constants.SERVING])
+saved_model_loaded = tf.saved_model.load('./checkpoints/yolov4-tiny-classroom-416', tags=[tag_constants.SERVING])
 infer = saved_model_loaded.signatures['serving_default']
 #chay camera
 # try:
@@ -55,7 +55,7 @@ def image_best(number_frame, minfame, classes = read_class_names(cfg.YOLO.CLASSE
         else:
             print('Video has ended or failed, try a different video format!')
             break
-        if count_frame % 2 == 0:
+        if count_frame % 3 == 0:
             # width:480 height: 854 cua video
             # frame_size = frame.shape[:2]
             # print(frame_size)
@@ -78,7 +78,7 @@ def image_best(number_frame, minfame, classes = read_class_names(cfg.YOLO.CLASSE
                 max_output_size_per_class=50,
                 max_total_size=50,
                 iou_threshold=0.2,
-                score_threshold=0.4
+                score_threshold=0.6
             )
             #print(boxes)
             pred_bbox = [boxes.numpy(), scores.numpy(), classes.numpy(), valid_detections.numpy()]
@@ -86,14 +86,13 @@ def image_best(number_frame, minfame, classes = read_class_names(cfg.YOLO.CLASSE
             image = utils.draw_bbox(frame, pred_bbox)
             #print(pred_bbox)
             #######################################################################################################################################
-            # xử lý đếm khung hình nhận là hand up, person và gán vào list thông tin khung hình có độ chính xác cao nhất
             for i in range(num_classes):
                 # print(i, "->", pred_bbox[2])
                 for j in range(num_classes):
                     if pred_bbox[2][0][j] == i:
-                        if pred_bbox[1][0][j] > 0.4:
+                        if pred_bbox[1][0][j] > 0.6:
                             count_frame_class[i]+=1
-                        if pred_bbox[1][0][j] > max_score_class[i] and pred_bbox[2][0][j] == i:
+                        if pred_bbox[1][0][j] > max_score_class[i]:
                             max_score_class[i] = pred_bbox[1][0][j]
                             class_arr[i].append([pred_bbox,image])
             fps = 1.0 / (time.time() - start_time)
@@ -110,18 +109,17 @@ def image_best(number_frame, minfame, classes = read_class_names(cfg.YOLO.CLASSE
             print(classes[i] + ":" + str(count_frame_class[i]))
     cv2.destroyAllWindows()
     ###############################################################################
-    #print(max_score_class)
     for z in range(num_classes):
         if count_frame_class[z] > minfame[z]:
             for i in range(len(class_arr[z])):
                 for j in range(num_classes):
-                    #print(z, "->", class_arr[z][i][0][1][0][j],max_score_class )
                     if class_arr[z][i][0][1][0][j] == max_score_class[z] and class_arr[z][i][0][2][0][j] == z:
-                        #print("check",class_arr[z][i])
-                        result_image.append(class_arr[z][i])
-                        #print(z, "->", len(result_image), "->",class_arr[z][i][0][2][0][j])
-    # print(max_score_class)
-    # print(result_image)
+                        if result_image==[]:
+                            result_image.append(class_arr[z][i])
+                        #print(result_image[len(result_image)-1][0][1][0][j])
+                        if class_arr[z][i][0][1][0][j] != result_image[len(result_image)-1][0][1][0][j] and result_image != []: 
+                            result_image.append(class_arr[z][i])   
+                        # print(z, "->",i, "->",class_arr[z][i][0][1][0], max_score_class )
     classes = read_class_names(cfg.YOLO.CLASSES)
     result = []
     for i in range(num_classes):    
