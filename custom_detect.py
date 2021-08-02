@@ -12,7 +12,7 @@ import numpy as np
 from core.config import cfg
 
 input_size = 416
-video_path = "./data/video/dirty.mp4"
+video_path = "./data/video/test.mp4"
 
 saved_model_loaded = tf.saved_model.load('./checkpoints/yolov4-tiny-classroom-416', tags=[tag_constants.SERVING])
 infer = saved_model_loaded.signatures['serving_default']
